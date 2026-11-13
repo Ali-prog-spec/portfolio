@@ -6,7 +6,8 @@ React + TypeScript + Vite, with GSAP for motion and Three.js (React Three Fiber)
 ## Highlights
 
 - **Builds itself live.** On load the page assembles itself (text types out, cards are dragged into place by a ghost cursor), then hands control to the visitor. Any scroll, key or click skips it. Honors `prefers-reduced-motion`.
-- **3D cartoon character.** A hand-built, procedural Three.js version of me: glossy rounded 3D style with teal and magenta rim lights, a mustache, a backwards cap and a dark sweatshirt. The eyes track the cursor and blink, and the head turns toward it. Falls back to a tilt-parallax portrait if WebGL is unavailable.
+- **3D character.** A hand-built, procedural Three.js head of me in a soft Pixar-like style: measured face shape, real 3D dark-brown eyes that follow the cursor and blink, thick brows, mustache and stubble, and a glossy black quiff drawn with an anisotropic hair shader. Falls back to a tilt-parallax portrait if WebGL is unavailable.
+- **Champagne water background.** Soft gold wave lines drift across a black page; scrolling nudges the water.
 - **Real content.** Projects, research and experience are pulled from the actual GitHub repos (`src/data.ts`).
 
 ## Run locally
@@ -31,7 +32,8 @@ npm run preview
 | `src/App.tsx` | Sections: hero, about, research, projects, toolbox, journey, contact |
 | `src/liveBuild.ts` | The scroll/autopilot "live build" effect |
 | `src/data.ts` | Projects, skills, timeline |
-| `src/components/CartoonAvatar.tsx` | The procedural 3D cartoon character |
+| `src/components/PersonAvatar.tsx` | The procedural 3D head |
+| `src/components/WaveBackground.tsx` | Champagne wave background |
 | `src/components/PortraitTilt.tsx` | Tilt-parallax portrait (WebGL fallback) |
 
 ## Contact

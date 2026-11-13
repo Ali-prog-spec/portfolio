@@ -1,7 +1,7 @@
 import { Component, Suspense, lazy, type ReactNode } from "react";
 import PortraitTilt from "./PortraitTilt";
 
-const CartoonAvatar = lazy(() => import("./CartoonAvatar"));
+const PersonAvatar = lazy(() => import("./PersonAvatar"));
 
 /** If WebGL is unavailable the hero quietly falls back to the tilt-parallax portrait. */
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -14,12 +14,12 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   }
 }
 
-/** The hero character: a hand-built glossy 3D cartoon version of me whose eyes follow the cursor. */
+/** The hero character: a hand-built Pixar-style 3D head of me whose eyes follow the cursor. */
 export default function HeroModel() {
   return (
     <Boundary>
       <Suspense fallback={<PortraitTilt />}>
-        <CartoonAvatar />
+        <PersonAvatar />
       </Suspense>
     </Boundary>
   );

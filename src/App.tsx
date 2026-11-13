@@ -5,6 +5,7 @@ import { EMAIL, GITHUB, LINKEDIN, PHONE, projects, skills, timeline, type Cat } 
 import HeroModel from "./components/HeroModel";
 import { useLiveBuild } from "./liveBuild";
 import Loader from "./components/Loader";
+import WaveBackground from "./components/WaveBackground";
 
 export type ThemeMode = "gold" | "silver" | "violet";
 
@@ -771,6 +772,7 @@ export default function App() {
       )}
       <CustomCursor />
       <div className="bg-canvas" aria-hidden="true" />
+      <WaveBackground />
       <Nav />
       <main>
         <Hero />

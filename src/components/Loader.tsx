@@ -59,17 +59,15 @@ export default function Loader({ onDone }: { onDone: () => void }) {
     audio.preload = "auto";
     audio.volume = 0.95;
     let played = false;
-    let blocked = false; // the browser refused autoplay (no interaction with the page yet)
     const tryPlay = () => {
       if (played) return;
       audio
         .play()
         .then(() => {
           played = true;
-          blocked = false;
         })
         .catch(() => {
-          blocked = true; // stay silent: no prompt; the first interaction during the splash plays it
+          // the browser refused autoplay: stay silent (a click never starts the audio)
         });
     };
 
@@ -82,11 +80,8 @@ export default function Loader({ onDone }: { onDone: () => void }) {
     const skip = () => {
       if (exitAt < 0) exitAt = performance.now();
     };
-    // any interaction skips the splash; if autoplay was blocked it is also the moment sound is allowed
-    const onGesture = () => {
-      if (blocked && !played) tryPlay();
-      skip();
-    };
+    // any click or key press only skips the splash; it never starts the audio
+    const onGesture = () => skip();
     window.addEventListener("keydown", onGesture);
     root.current!.addEventListener("pointerdown", onGesture);
     const mute = muteBtn.current!;

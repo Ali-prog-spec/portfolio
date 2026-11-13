@@ -4,9 +4,9 @@ import { useCallback, useLayoutEffect, useRef } from "react";
  * Scroll-driven live build, element by element.
  *
  * Every real element on the page (headings, paragraphs, cards, chips) is its own blueprint:
- *  - text       shimmers as a placeholder, then is typed out character by character
- *  - cards      show as dashed wireframes, get dragged into place by a ghost cursor, then fill with content
- *  - chips      pop in
+ *  - a ghost pointer drag-selects the element's area (a marquee with a live size readout),
+ *  - then the content appears inside the selection: text is typed out slowly, cards fill in
+ *  - small chips just pop in
  * Progress is a pure function of scroll position (never a timer), only moves forward, and finishes
  * before an element reaches mid-screen, so whatever you are reading is always fully built.
  */
@@ -32,18 +32,24 @@ type Item = {
   total?: number;
   kids?: HTMLElement[];
   lbl?: HTMLElement;
-  sx?: number;
-  sr?: number;
+  marq?: HTMLElement;
+  typeEls?: { el: HTMLElement; nodes: { n: Text; full: string }[]; total: number }[];
 };
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const pascal = (s: string) => s.replace(/(^|[-_])(\w)/g, (_, __, c) => c.toUpperCase());
 
+const SELECT_END = 0.38; // fraction of an element's progress spent drag-selecting its area
+const TYPE_SEL = "h3, h4, p"; // text inside cards that gets typed in once the card is selected
+
 export function useLiveBuild() {
   const cleanup = useRef<() => void>();
+  const readyRef = useRef(false); // set once the splash loader is done
+  const kickRef = useRef<(() => void) | null>(null);
 
   const start = useCallback(() => {
     cleanup.current?.();
@@ -68,16 +74,16 @@ export function useLiveBuild() {
     scope(SEL.card).forEach((el) => {
       const sibs = el.parentElement ? Array.from(el.parentElement.children) : [el];
       const idx = sibs.indexOf(el);
-      add(el, "card", { band: clamp(el.offsetHeight * 0.7, 260, 420), delay: (idx % 3) * 46 });
+      add(el, "card", { band: clamp(el.offsetHeight * 0.9, 340, 520), delay: (idx % 3) * 150 });
     });
-    scope(SEL.text).forEach((el) => !inCard(el) && add(el, "text", { band: 190 }));
+    scope(SEL.text).forEach((el) => !inCard(el) && add(el, "text", { band: 260 }));
     scope(SEL.chip).forEach((el) => !inCard(el) && add(el, "chip", { band: 120 }));
 
     // document order, so the HUD can always show the "latest" element
     items.sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
 
     // ── initial blueprint state ────────────────────────────────
-    items.forEach((it, i) => {
+    items.forEach((it) => {
       it.el.removeAttribute("data-reveal");
       it.el.querySelectorAll("[data-reveal]").forEach((n) => n.removeAttribute("data-reveal"));
       if (it.kind === "text") {
@@ -89,8 +95,18 @@ export function useLiveBuild() {
         it.total = nodes.reduce((s, x) => s + x.full.length, 0);
         it.el.classList.add("lb-ghost-text");
       } else if (it.kind === "card") {
-        const left = i % 2 === 0 ? -1 : 1;
         it.kids = Array.from(it.el.children) as HTMLElement[];
+        // text inside the card is typed in later; lock each block's height so the layout never shifts
+        it.typeEls = Array.from(it.el.querySelectorAll<HTMLElement>(TYPE_SEL))
+          .filter((t) => !t.classList.contains("lb-lbl"))
+          .map((t) => {
+            const w = document.createTreeWalker(t, NodeFilter.SHOW_TEXT);
+            const nodes: { n: Text; full: string }[] = [];
+            let n: Node | null;
+            while ((n = w.nextNode())) nodes.push({ n: n as Text, full: (n as Text).nodeValue ?? "" });
+            t.style.minHeight = `${t.offsetHeight}px`;
+            return { el: t, nodes, total: nodes.reduce((acc, x) => acc + x.full.length, 0) };
+          });
         it.kids.forEach((k) => (k.style.opacity = "0"));
         const lbl = document.createElement("span");
         lbl.className = "lb-lbl";
@@ -100,10 +116,6 @@ export function useLiveBuild() {
         it.lbl = lbl;
         it.el.classList.add("lb-wire");
         it.el.style.transition = "none";
-        it.sx = left * 46;
-        it.sr = left * -1.8;
-        it.dy = 64;
-        it.el.style.transform = `translate3d(${it.sx}px, 64px, 0) rotate(${it.sr}deg) scale(0.97)`;
       } else {
         it.el.style.transition = "none";
         it.el.style.opacity = "0";
@@ -114,7 +126,7 @@ export function useLiveBuild() {
     // ── cursor + HUD ───────────────────────────────────────────
     const cursor = document.createElement("div");
     cursor.className = "lb-cursor";
-    cursor.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 3L11.5 21L14.5 13.5L22 10.5L4 3Z" fill="#f59e0b" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><span>drag</span>`;
+    cursor.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 3L11.5 21L14.5 13.5L22 10.5L4 3Z" fill="#f59e0b" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><span>select</span>`;
     cursor.style.opacity = "0";
     const hud = document.createElement("div");
     hud.className = "lb-hud";
@@ -142,6 +154,10 @@ export function useLiveBuild() {
           k.style.transform = "";
         });
         it.lbl?.remove();
+        it.typeEls?.forEach((t) => {
+          t.nodes.forEach((x) => (x.n.nodeValue = x.full));
+          t.el.style.minHeight = "";
+        });
         el.classList.remove("lb-wire", "lb-held");
         el.style.transition = "";
         el.style.transform = "";
@@ -151,6 +167,9 @@ export function useLiveBuild() {
         el.style.opacity = "";
         el.style.transform = "";
       }
+      it.marq?.remove();
+      it.marq = undefined;
+      el.classList.remove("lb-sel");
       it.dy = 0;
     };
 
@@ -169,50 +188,77 @@ export function useLiveBuild() {
     const poke = window.setInterval(mark, 350); // layout can shift as fonts/images load
     document.fonts?.ready.then(mark);
 
+    const typeInto = (nodes: { n: Text; full: string }[], total: number, q: number) => {
+      let remaining = Math.floor(clamp(q, 0, 1) * total);
+      nodes.forEach((x) => {
+        const take = Math.min(remaining, x.full.length);
+        x.n.nodeValue = x.full.slice(0, take);
+        remaining -= take;
+      });
+    };
+
     const apply = (it: Item, p: number) => {
       const el = it.el;
       if (it.kind === "text") {
-        if (p <= 0) return;
+        if (p < SELECT_END) return; // still being selected: the shimmering placeholder stays
         if (!it.started) {
           it.started = true;
           el.style.minHeight = `${el.offsetHeight}px`; // measured while the full text is still in place
           el.classList.remove("lb-ghost-text");
           el.classList.add("lb-typing");
         }
-        let remaining = Math.floor(p * (it.total ?? 0));
-        it.nodes!.forEach((x) => {
-          const take = Math.min(remaining, x.full.length);
-          x.n.nodeValue = x.full.slice(0, take);
-          remaining -= take;
-        });
+        typeInto(it.nodes!, it.total ?? 0, (p - SELECT_END) / (1 - SELECT_END));
       } else if (it.kind === "card") {
-        const kids = it.kids!;
-        if (p < 0.5) {
-          const t = easeOut(p / 0.5);
-          it.dy = 64 * (1 - t);
-          el.style.transform = `translate3d(${it.sx! * (1 - t)}px, ${it.dy}px, 0) rotate(${it.sr! * (1 - t)}deg) scale(${0.97 + 0.03 * t})`;
-          el.classList.toggle("lb-held", p > 0.02);
-        } else {
-          if (el.classList.contains("lb-wire")) {
-            el.classList.remove("lb-wire", "lb-held");
-            el.style.transform = "";
-            it.dy = 0;
-            it.lbl?.remove();
-            el.style.transition = "background-color .35s, border-color .35s, box-shadow .35s";
-          }
-          const f = (p - 0.5) / 0.5;
-          const n = kids.length;
-          kids.forEach((k, i) => {
-            const op = clamp(f * (n + 0.8) - i, 0, 1);
-            k.style.opacity = String(op);
-            k.style.transform = op < 1 ? `translateY(${(1 - op) * 14}px)` : "";
-          });
+        if (p < 0.5) return; // wireframe stays while the pointer selects the area
+        if (el.classList.contains("lb-wire")) {
+          el.classList.remove("lb-wire", "lb-held");
+          it.lbl?.remove();
+          el.style.transition = "background-color .5s, border-color .5s, box-shadow .5s";
         }
+        const f = (p - 0.5) / 0.5;
+        const kids = it.kids!;
+        kids.forEach((k, i) => {
+          k.style.opacity = String(clamp(f * 5 - i * 0.35, 0, 1));
+        });
+        it.typeEls!.forEach((t) => typeInto(t.nodes, t.total, (f - 0.15) / 0.8));
       } else {
         const t = easeOut(p);
         el.style.opacity = String(t);
         el.style.transform = `scale(${0.7 + 0.3 * t})`;
       }
+    };
+
+    // the drag-selection marquee that "draws" an element's area before its content appears
+    const marquee = (it: Item, r: DOMRect, p: number) => {
+      if (it.kind === "chip") return;
+      if (p >= 0.58) {
+        if (it.marq) {
+          it.marq.remove();
+          it.marq = undefined;
+          it.el.classList.remove("lb-sel");
+        }
+        return;
+      }
+      if (!it.marq) {
+        const m = document.createElement("div");
+        m.className = "lb-marq";
+        m.innerHTML = '<i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i><span class="tg"></span><span class="dm"></span>';
+        document.body.appendChild(m);
+        it.marq = m;
+        it.el.classList.add("lb-sel"); // the marquee tag replaces the in-card label
+        const tag = it.kind === "card" ? it.lbl?.textContent : `<${it.el.tagName.toLowerCase()}>`;
+        m.querySelector<HTMLElement>(".tg")!.textContent = tag ?? "";
+      }
+      const sel = easeInOut(clamp(p / SELECT_END, 0, 1));
+      const w = r.width * sel;
+      const h = r.height * sel;
+      const m = it.marq;
+      m.style.transform = `translate3d(${r.left}px, ${r.top}px, 0)`;
+      m.style.width = `${w}px`;
+      m.style.height = `${h}px`;
+      m.style.opacity = String(p < 0.46 ? 1 : 1 - (p - 0.46) / 0.12);
+      m.classList.toggle("set", p >= SELECT_END);
+      m.querySelector<HTMLElement>(".dm")!.textContent = `${Math.round(w)} × ${Math.round(h)}`;
     };
 
     const describe = (it: Item) => {
@@ -242,10 +288,10 @@ export function useLiveBuild() {
 
       // write phase
       let current: Item | null = null;
-      let drag: { it: Item; r: DOMRect } | null = null;
+      let drag: { it: Item; r: DOMRect; sel: number } | null = null;
       pending.forEach((it, k) => {
         const r = rects[k];
-        const natural = r.top - it.dy;
+        const natural = r.top;
         // skip anything far below the front that has not started
         if (!force && natural > front + 120 && it.p === 0) return;
         const p = force ? 1 : clamp((front - natural - it.delay) / (it.band * bandScale), 0, 1);
@@ -258,16 +304,20 @@ export function useLiveBuild() {
         }
         if (it.p > 0) {
           apply(it, it.p);
+          marquee(it, r, it.p);
           current = it;
-          if (it.kind === "card" && it.p < 0.5 && (!drag || it.p > drag.it.p)) drag = { it, r };
+          if (it.kind !== "chip" && it.p < SELECT_END + 0.06 && (!drag || it.p > drag.it.p)) drag = { it, r, sel: easeInOut(clamp(it.p / SELECT_END, 0, 1)) };
         }
       });
 
       // ghost cursor rides the card currently being dragged
       if (drag) {
-        const { r } = drag as { it: Item; r: DOMRect };
+        const { r, sel } = drag as { it: Item; r: DOMRect; sel: number };
+        // the pointer sits on the marquee's moving bottom-right corner
+        const cx = clamp(r.left + r.width * sel, 12, window.innerWidth - 60);
+        const cy = clamp(r.top + r.height * sel, 76, window.innerHeight - 40);
         cursor.style.opacity = "1";
-        cursor.style.transform = `translate3d(${Math.min(r.right - 18, window.innerWidth - 40)}px, ${Math.max(r.top + 14, 70)}px, 0)`;
+        cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
       } else cursor.style.opacity = "0";
 
       // HUD
@@ -336,12 +386,13 @@ export function useLiveBuild() {
       e.stopPropagation();
       stopAuto(false);
     });
-    const startTimer = window.setTimeout(() => {
+    let startTimer: number | undefined;
+    const runAuto = () => {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
       auto = true;
-      bandScale = 2.2;
+      bandScale = 2.6;
       INPUTS.forEach((e) => window.addEventListener(e, onInput, { passive: true }));
-      const VMAX = 900; // px per second
+      const VMAX = 520; // px per second (slow enough to watch each selection and the typing)
       const RAMP = 0.7; // seconds to speed up / slow down
       const t0 = performance.now();
       lastY = window.scrollY;
@@ -362,13 +413,17 @@ export function useLiveBuild() {
         autoRaf = requestAnimationFrame(frame);
       };
       autoRaf = requestAnimationFrame(frame);
-    }, 1300);
+    };
+    const kick = () => (startTimer = window.setTimeout(runAuto, 500));
+    if (readyRef.current) kick();
+    else kickRef.current = kick; // wait for the splash loader to finish
 
     cleanup.current = () => {
       cancelAnimationFrame(raf);
       window.clearInterval(poke);
       window.clearTimeout(outTimer);
       window.clearTimeout(startTimer);
+      kickRef.current = null;
       cancelAnimationFrame(autoRaf);
       cancelAnimationFrame(backRaf);
       INPUTS.forEach((e) => window.removeEventListener(e, onInput));
@@ -390,5 +445,12 @@ export function useLiveBuild() {
     start();
   }, [start]);
 
-  return { replay };
+  // called by the splash loader when it has faded out: let the autopilot start
+  const begin = useCallback(() => {
+    readyRef.current = true;
+    kickRef.current?.();
+    kickRef.current = null;
+  }, []);
+
+  return { replay, begin };
 }

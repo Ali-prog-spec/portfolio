@@ -4,6 +4,7 @@ import { EMAIL, GITHUB, LINKEDIN, PHONE, projects, skills, timeline, type Cat } 
 
 import HeroModel from "./components/HeroModel";
 import { useLiveBuild } from "./liveBuild";
+import Loader from "./components/Loader";
 
 export type ThemeMode = "gold" | "silver" | "violet";
 
@@ -794,9 +795,18 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>("gold");
   useReveal();
   const build = useLiveBuild();
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <div className={`portfolio-app theme-${theme}`}>
+      {!loaded && (
+        <Loader
+          onDone={() => {
+            setLoaded(true);
+            build.begin();
+          }}
+        />
+      )}
       <CustomCursor />
       <div className="bg-canvas" aria-hidden="true" />
       <Nav theme={theme} setTheme={setTheme} />

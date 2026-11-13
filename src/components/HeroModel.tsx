@@ -1,26 +1,26 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Component, Suspense, lazy, type ReactNode } from "react";
 import PortraitTilt from "./PortraitTilt";
 
-const ModelViewer = lazy(() => import("./ModelViewer"));
+const GhibliAvatar = lazy(() => import("./GhibliAvatar"));
 
-/**
- * Shows the full 3D model when public/avatar.glb exists (drag to orbit),
- * otherwise falls back to the tilt-parallax portrait.
- */
+/** If WebGL is unavailable the hero quietly falls back to the tilt-parallax portrait. */
+class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? <PortraitTilt /> : this.props.children;
+  }
+}
+
+/** The hero character: a hand-built Ghibli-style 3D version of me whose eyes follow the cursor. */
 export default function HeroModel() {
-  const [hasGlb, setHasGlb] = useState(false);
-
-  useEffect(() => {
-    // Vite serves index.html for unknown paths, so check the content type as well as the status.
-    fetch("/avatar.glb", { method: "HEAD" })
-      .then((r) => setHasGlb(r.ok && !(r.headers.get("content-type") ?? "").includes("text/html")))
-      .catch(() => setHasGlb(false));
-  }, []);
-
-  if (!hasGlb) return <PortraitTilt />;
   return (
-    <Suspense fallback={<PortraitTilt />}>
-      <ModelViewer />
-    </Suspense>
+    <Boundary>
+      <Suspense fallback={<PortraitTilt />}>
+        <GhibliAvatar />
+      </Suspense>
+    </Boundary>
   );
 }

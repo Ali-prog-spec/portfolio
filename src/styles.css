@@ -1999,3 +1999,253 @@ h2 {
 .ld-en { font: 500 .85rem var(--font-mono, monospace); letter-spacing: .7em; padding-left: .7em; color: #cfd6e0; }
 .ld-line { display: block; width: min(240px, 52vw); height: 1px; transform: scaleX(0); background: linear-gradient(90deg, transparent, var(--accent, #f59e0b), transparent); }
 @media (max-width: 520px) { .ld-en { font-size: .72rem; letter-spacing: .55em; padding-left: .55em; } }
+
+/* =========================================================================
+   PIXAR STYLIZED STAGE: GIANT BACKDROP LETTERS & HERO ACCENTS
+   ========================================================================= */
+/* =========================================================================
+   PIXAR STYLIZED STAGE: 3D CHARACTER HERO & REFERENCE IMAGE STYLING
+   ========================================================================= */
+.hero-3d-stage {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: #08090d;
+}
+
+.pixar-hero-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 40%, #151821 0%, #090a0f 65%, #050608 100%);
+  user-select: none;
+}
+
+.stage-specular-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: screen;
+  transition: background 0.15s ease-out;
+}
+
+.stage-ambient-glow {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(40px);
+}
+
+.pixar-giant-letters {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-main);
+  font-weight: 900;
+  font-size: clamp(3.8rem, 9.5vw, 7.8rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  color: #64748b;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.45) 0%, rgba(100, 116, 139, 0.18) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  z-index: 1;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.pixar-character-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.pixar-character-img {
+  max-height: 94%;
+  max-width: 90%;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 40px rgba(245, 158, 11, 0.12));
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.pixar-ref-cursor {
+  position: absolute;
+  top: 38%;
+  left: 35%;
+  z-index: 5;
+  pointer-events: none;
+  animation: floatCursor 3.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+}
+
+@keyframes floatCursor {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-6px, 10px) rotate(-4deg); }
+  100% { transform: translate(5px, -6px) rotate(2deg); }
+}
+
+.pixar-bottom-lede {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.pixar-bottom-lede p {
+  margin: 0;
+}
+
+.pixar-contact-pill {
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 26px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 25px -4px rgba(168, 85, 247, 0.65), 0 0 15px rgba(236, 72, 153, 0.45);
+  z-index: 15;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s;
+}
+
+.pixar-contact-pill:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 32px -4px rgba(168, 85, 247, 0.85), 0 0 25px rgba(245, 158, 11, 0.7);
+  color: #ffffff;
+}
+
+.pixar-3d-badge {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(14, 16, 22, 0.85);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  backdrop-filter: blur(10px);
+  z-index: 15;
+}
+
+.hero-model-switch {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 12, 16, 0.85);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  z-index: 20;
+}
+
+.switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.switch-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.switch-btn.active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+.switch-btn .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.switch-btn.active .dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+@media (max-width: 640px) {
+  .hero-3d-stage {
+    height: 480px;
+  }
+  .pixar-bottom-lede {
+    display: none;
+  }
+  .pixar-contact-pill {
+    bottom: 16px;
+    right: 16px;
+    padding: 8px 18px;
+    font-size: 0.7rem;
+  }
+  .pixar-giant-letters {
+    font-size: 3.2rem;
+    top: 22%;
+  }
+  .pixar-ref-cursor {
+    display: none;
+  }
+}

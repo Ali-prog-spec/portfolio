@@ -316,8 +316,8 @@ function Hero() {
             <span className="dot-yellow" />
             <span className="dot-green" />
           </div>
-          <span className="window-title">Muhammad Ali · 3D Portrait</span>
-          <span className="window-tag">Cursor-responsive</span>
+          <span className="window-title">Muhammad Ali · 3D Studio</span>
+          <span className="window-tag">Pixar 3D &amp; Three.js</span>
         </div>
 
         <div className="hero-3d-stage">

@@ -286,22 +286,20 @@ export const timeline = [
     ],
   },
   {
+    when: "Feb 2026 – Apr 2026",
+    title: "ML / App / Agentic Intern (completed)",
+    org: "Ishraq Labs, Islamabad",
+    points: [
+      "Worked across machine learning, app development and agentic systems",
+    ],
+  },
+  {
     when: "2023 – Present",
     title: "BS Computer Science, final year",
     org: "FAST-NUCES, Islamabad",
     points: [
       "Recent coursework: Information Security, Generative AI, Compiler Construction, Mobile Development, Operating Systems",
       "Coursework projects are shipped as full apps: model training, benchmarks, deployment and written reports",
-    ],
-  },
-  {
-    when: "Jan – Mar 2024",
-    title: "Software Engineering Intern (completed)",
-    org: "Ishraq Labs, Islamabad",
-    points: [
-      "Built the Ayat (verse) sharing feature end-to-end for the Zaad-ul-Quran mobile app",
-      "Frontend design, UX improvements and backend API support",
-      "Explored AI-driven content recommendation",
     ],
   },
   {

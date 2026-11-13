@@ -364,8 +364,8 @@ function About() {
           </p>
 
           <p>
-            Alongside my studies, I work as a <b>Full-Stack Engineer at K2 Studio</b>, where I progressed
-            from an engineering intern to delivering production features. Earlier, I completed a Machine Learning
+            Alongside my studies, I work as a <b>Full-Stack Engineer at K2 Studio</b>, where I started
+            as an intern and moved into a part-time engineering role. Before that, I completed an ML, app and agentic
             internship at <b>Ishraq Labs</b>.
           </p>
 
@@ -381,17 +381,12 @@ function About() {
             <div className="exp-card">
               <span className="exp-role">Full-Stack Engineer</span>
               <span className="exp-company">K2 Studio</span>
-              <span className="exp-time">Jan 2025 – Present</span>
+              <span className="exp-time">Nov 2026 – Present</span>
             </div>
             <div className="exp-card">
-              <span className="exp-role">Software Intern</span>
-              <span className="exp-company">K2 Studio</span>
-              <span className="exp-time">Oct 2024 – Dec 2024</span>
-            </div>
-            <div className="exp-card">
-              <span className="exp-role">ML Intern</span>
+              <span className="exp-role">ML / App / Agentic Intern</span>
               <span className="exp-company">Ishraq Labs</span>
-              <span className="exp-time">Jul 2024 – Sep 2024</span>
+              <span className="exp-time">Feb 2026 – Apr 2026</span>
             </div>
           </div>
         </div>

@@ -384,6 +384,11 @@ function About() {
               <span className="exp-time">Nov 2026 – Present</span>
             </div>
             <div className="exp-card">
+              <span className="exp-role">Software Intern</span>
+              <span className="exp-company">K2 Studio</span>
+              <span className="exp-time">Aug 2026 – Oct 2026</span>
+            </div>
+            <div className="exp-card">
               <span className="exp-role">ML / App / Agentic Intern</span>
               <span className="exp-company">Ishraq Labs</span>
               <span className="exp-time">Feb 2026 – Apr 2026</span>

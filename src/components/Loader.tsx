@@ -14,6 +14,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
   const bar = useRef<HTMLDivElement>(null);
   const hint = useRef<HTMLSpanElement>(null);
   const muteBtn = useRef<HTMLButtonElement>(null);
+  const touch = window.matchMedia("(hover: none)").matches;
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -29,7 +30,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
     cv.style.width = cv.style.height = `${S}px`;
     const W = cv.width;
     const C = W / 2;
-    const R = W * 0.19; // radius of the face circle
+    const R = W * (window.innerWidth < 520 ? 0.235 : 0.19); // radius of the face circle
 
     const SHOW = 3.2; // seconds the face + ripples are shown before it sinks away
     const EXIT = 1.0; // sink + fade
@@ -206,9 +207,9 @@ export default function Loader({ onDone }: { onDone: () => void }) {
         </div>
       </div>
       <span className="ld-hint" ref={hint}>
-        tap anywhere to hear the welcome
+        {touch ? "tap to hear the welcome" : "tap anywhere to hear the welcome"}
       </span>
-      <span className="ld-skip">click or press any key to skip</span>
+      <span className="ld-skip">{touch ? "tap to skip" : "click or press any key to skip"}</span>
     </div>
   );
 }

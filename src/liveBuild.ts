@@ -294,7 +294,9 @@ export function useLiveBuild() {
         const natural = r.top;
         // skip anything far below the front that has not started
         if (!force && natural > front + 120 && it.p === 0) return;
-        const p = force ? 1 : clamp((front - natural - it.delay) / (it.band * bandScale), 0, 1);
+        // on phones the page is much taller, so cap how long one element stays mid-build
+        const eff = window.innerWidth < 768 ? Math.min(it.band * bandScale, vh * 0.85) : it.band * bandScale;
+        const p = force ? 1 : clamp((front - natural - it.delay) / eff, 0, 1);
         if (p > it.p) it.p = p;
         if (it.p >= 1) {
           restore(it);
@@ -392,7 +394,9 @@ export function useLiveBuild() {
       auto = true;
       bandScale = 2.6;
       INPUTS.forEach((e) => window.addEventListener(e, onInput, { passive: true }));
-      const VMAX = 520; // px per second (slow enough to watch each selection and the typing)
+      // slow enough to watch each selection and the typing; faster on tall (phone) pages so the whole
+      // build still takes roughly 18 seconds
+      const VMAX = clamp((document.documentElement.scrollHeight - window.innerHeight) / 18, 520, 1100);
       const RAMP = 0.7; // seconds to speed up / slow down
       const t0 = performance.now();
       lastY = window.scrollY;

@@ -1961,3 +1961,25 @@ h2 {
 .ld-mute { position: fixed; top: 18px; right: 20px; z-index: 2; font: 500 .66rem var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; color: #8d99a8; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 6px 13px; cursor: pointer; }
 .ld-mute:hover { color: #fff; border-color: var(--accent, #f59e0b); }
 .ld-hint { position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%); font-size: .7rem; letter-spacing: .1em; color: var(--accent, #f59e0b); opacity: 0; transition: opacity .4s; }
+
+/* ===== Mobile ===== */
+.ld-hint, .ld-skip { white-space: nowrap; text-align: center; }
+.ld-hint { bottom: 54px; }
+@media (max-width: 768px) {
+  .nav-inner { gap: 10px; }
+  .logo-name { white-space: nowrap; font-size: 1rem; }
+  .theme-toggle-group { gap: 2px; padding: 3px; }
+  .theme-chip { padding: 7px 9px; }
+  .theme-name { display: none; }
+}
+@media (max-width: 520px) {
+  .window-tag { display: none; }
+  .window-title { font-size: .66rem; }
+  .hero-3d-header { padding: 10px 14px; }
+  .ld-name { font-size: .78rem; letter-spacing: .3em; padding-left: .3em; }
+  .ld-sub { font-size: .6rem; padding: 0 12px; }
+  .ld-mute { top: 12px; right: 12px; }
+  .ld-hint, .ld-skip { font-size: .6rem; }
+  .lb-hud { width: min(300px, calc(100vw - 24px)); }
+  .lb-marq .tg, .lb-marq .dm { font-size: 9px; }
+}

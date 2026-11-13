@@ -4,7 +4,7 @@ const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
 /**
  * Splash loader: your face sits sharp inside a circle while ripples transmit outward from it
- * like a signal, a short voice line says welcome, then the whole thing sinks and fades away.
+ * like a signal, a short voice says "welcome" once at the start, then the whole thing sinks and fades away.
  * onDone fires once it is gone, which is when the live build starts.
  */
 export default function Loader({ onDone }: { onDone: () => void }) {
@@ -12,7 +12,6 @@ export default function Loader({ onDone }: { onDone: () => void }) {
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const bar = useRef<HTMLDivElement>(null);
-  const hint = useRef<HTMLSpanElement>(null);
   const muteBtn = useRef<HTMLButtonElement>(null);
   const touch = window.matchMedia("(hover: none)").matches;
 
@@ -43,12 +42,12 @@ export default function Loader({ onDone }: { onDone: () => void }) {
     let raf = 0;
     let finished = false;
 
-    // ── welcome voice ──
+    // ── welcome voice: tried automatically, once, right at the start ──
     const audio = new Audio("/welcome.mp3");
     audio.preload = "auto";
     audio.volume = 0.95;
     let played = false;
-    let blocked = false; // the browser refused autoplay; wait for the first tap
+    let blocked = false; // the browser refused autoplay (no interaction with the page yet)
     const tryPlay = () => {
       if (played) return;
       audio
@@ -56,11 +55,9 @@ export default function Loader({ onDone }: { onDone: () => void }) {
         .then(() => {
           played = true;
           blocked = false;
-          if (hint.current) hint.current.style.opacity = "0";
         })
         .catch(() => {
-          blocked = true;
-          if (hint.current) hint.current.style.opacity = "1";
+          blocked = true; // stay silent: no prompt; the first interaction during the splash plays it
         });
     };
 
@@ -73,10 +70,10 @@ export default function Loader({ onDone }: { onDone: () => void }) {
     const skip = () => {
       if (exitAt < 0) exitAt = performance.now();
     };
-    // the first tap/key plays the greeting when autoplay was blocked; otherwise it skips the splash
+    // any interaction skips the splash; if autoplay was blocked it is also the moment sound is allowed
     const onGesture = () => {
       if (blocked && !played) tryPlay();
-      else skip();
+      skip();
     };
     window.addEventListener("keydown", onGesture);
     root.current!.addEventListener("pointerdown", onGesture);
@@ -111,10 +108,8 @@ export default function Loader({ onDone }: { onDone: () => void }) {
       if (t0 < 0) {
         if (img.complete && img.naturalWidth) {
           t0 = now;
-          tryPlay();
         } else if (now - created > 2500) {
           t0 = now; // never hang on a slow image
-          tryPlay();
         } else return;
       }
       const t = (now - t0) / 1000;
@@ -181,6 +176,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
         }
       }
     };
+    tryPlay();
     raf = requestAnimationFrame(frame);
 
     return () => {
@@ -206,9 +202,6 @@ export default function Loader({ onDone }: { onDone: () => void }) {
           <div ref={bar} />
         </div>
       </div>
-      <span className="ld-hint" ref={hint}>
-        {touch ? "tap to hear the welcome" : "tap anywhere to hear the welcome"}
-      </span>
       <span className="ld-skip">{touch ? "tap to skip" : "click or press any key to skip"}</span>
     </div>
   );

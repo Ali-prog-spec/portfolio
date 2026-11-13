@@ -6,7 +6,7 @@ React + TypeScript + Vite, with GSAP for motion and Three.js (React Three Fiber)
 ## Highlights
 
 - **Builds itself live.** On load the page assembles itself (text types out, cards are dragged into place by a ghost cursor), then hands control to the visitor. Any scroll, key or click skips it. Honors `prefers-reduced-motion`.
-- **Interactive portrait.** A cursor-responsive tilt-parallax portrait in the hero. If `public/avatar.glb` exists, the hero shows an orbitable 3D model instead.
+- **3D portrait.** `public/avatar.glb` is a 3D model of me generated from a single photo (TripoSR, then smoothed), turning to face the cursor. If the file is missing, the hero falls back to a cursor-responsive tilt-parallax portrait.
 - **Real content.** Projects, research and experience are pulled from the actual GitHub repos (`src/data.ts`).
 
 ## Run locally

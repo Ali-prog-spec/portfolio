@@ -315,7 +315,7 @@ function Hero() {
             <span className="dot-yellow" />
             <span className="dot-green" />
           </div>
-          <span className="window-title">Muhammad Ali · Interactive Portrait</span>
+          <span className="window-title">Muhammad Ali · 3D Portrait</span>
           <span className="window-tag">Cursor-responsive</span>
         </div>
 

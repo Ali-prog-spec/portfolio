@@ -2547,3 +2547,17 @@ h2 {
     display: none;
   }
 }
+
+/* Live portrait (hero): the picture fills the stage, eyes are drawn on a canvas */
+.alive-portrait {
+  position: absolute;
+  inset: 0;
+  background: #0b0e0f;
+}
+.alive-portrait canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}

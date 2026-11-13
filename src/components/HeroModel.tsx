@@ -1,7 +1,7 @@
 import { Component, Suspense, lazy, type ReactNode } from "react";
 import PortraitTilt from "./PortraitTilt";
 
-const GhibliAvatar = lazy(() => import("./GhibliAvatar"));
+const CartoonAvatar = lazy(() => import("./CartoonAvatar"));
 
 /** If WebGL is unavailable the hero quietly falls back to the tilt-parallax portrait. */
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -14,12 +14,12 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   }
 }
 
-/** The hero character: a hand-built Ghibli-style 3D version of me whose eyes follow the cursor. */
+/** The hero character: a hand-built glossy 3D cartoon version of me whose eyes follow the cursor. */
 export default function HeroModel() {
   return (
     <Boundary>
       <Suspense fallback={<PortraitTilt />}>
-        <GhibliAvatar />
+        <CartoonAvatar />
       </Suspense>
     </Boundary>
   );

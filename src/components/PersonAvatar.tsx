@@ -542,7 +542,7 @@ function Eye({ side, look, surf, skin, irisTex }: { side: -1 | 1; look: React.Mu
   const upper = useRef<THREE.Group>(null);
   const lower = useRef<THREE.Group>(null);
   const cx = side * 0.42, cy = 0.1;
-  const depth = 0.135;
+  const depth = 0.165;
   const pos = useMemo(() => surf.point(cx, cy, -depth), [surf, cx]);
   const quat = useMemo(() => surf.quat(cx, cy), [surf, cx]);
   const geo = useMemo(() => {

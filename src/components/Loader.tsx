@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import WaveBackground from "./WaveBackground";
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const smooth = (x: number) => {
@@ -209,6 +210,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="ld-root" ref={root}>
+      <WaveBackground variant="loader" />
       <button className="ld-mute" ref={muteBtn} type="button">
         sound on
       </button>

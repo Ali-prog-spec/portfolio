@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
  * Champagne water: soft, flowing wave lines drifting across the whole screen over a black base.
  * Movement is slow and light; scrolling nudges the water a little. Respects reduced motion.
  */
-export default function WaveBackground() {
+export default function WaveBackground({ variant = "page" }: { variant?: "page" | "loader" }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -107,5 +107,5 @@ export default function WaveBackground() {
     };
   }, []);
 
-  return <canvas ref={ref} className="wave-bg" aria-hidden="true" />;
+  return <canvas ref={ref} className={variant === "loader" ? "wave-bg wave-bg--loader" : "wave-bg"} aria-hidden="true" />;
 }

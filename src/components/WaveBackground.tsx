@@ -13,7 +13,7 @@ export default function WaveBackground({ variant = "page" }: { variant?: "page" 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let W = 0, H = 0, dpr = 1;
     const resize = () => {
-      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      dpr = Math.min(1.25, window.devicePixelRatio || 1);
       W = window.innerWidth;
       H = window.innerHeight;
       cv.width = Math.round(W * dpr);
@@ -34,13 +34,17 @@ export default function WaveBackground({ variant = "page" }: { variant?: "page" 
     window.addEventListener("scroll", onScroll, { passive: true });
 
     let t = 0;
-    let last = performance.now();
+    let lastDraw = performance.now();
     let raf = 0;
+    const splashUp = () => !(window as unknown as { __splashDone?: boolean }).__splashDone;
 
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
+      // slow water needs no more than 30 fps; while the splash covers the page, only 15
+      const minDt = variant === "page" && splashUp() ? 66 : 33;
+      if (now - lastDraw < minDt) return;
+      const dt = Math.min(0.1, (now - lastDraw) / 1000);
+      lastDraw = now;
       kick *= 0.94;
       push += (kick - push) * 0.08;
       t += dt * (1 + push * 1.6);
@@ -48,8 +52,8 @@ export default function WaveBackground({ variant = "page" }: { variant?: "page" 
       ctx.clearRect(0, 0, W, H);
 
       const small = W < 700;
-      const lines = small ? 16 : 26;
-      const step = small ? 14 : 10;
+      const lines = small ? 14 : 20;
+      const step = small ? 16 : 12;
       const gap = H / (lines - 1);
 
       // champagne gradient across the width: bright in the middle, fading to the edges

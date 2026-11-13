@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
@@ -81,37 +81,19 @@ function makeHeadGeometry() {
   return g;
 }
 
-/** height map of the face so features can be laid onto the surface */
+/**
+ * The face surface, so features can be laid onto it. The head is a closed-form shape
+ * (a superellipse per height), so the depth at (x, y) is computed directly: no ray casting.
+ */
 class Surface {
-  private N = 72;
-  private x0 = -1.15;
-  private x1 = 1.15;
-  private y0 = -1.1;
-  private y1 = 1.1;
-  private z: Float32Array;
-  constructor(geo: THREE.BufferGeometry) {
-    const mesh = new THREE.Mesh(geo);
-    mesh.updateMatrixWorld(true);
-    const rc = new THREE.Raycaster();
-    const dir = new V3(0, 0, -1);
-    this.z = new Float32Array(this.N * this.N);
-    for (let j = 0; j < this.N; j++)
-      for (let i = 0; i < this.N; i++) {
-        const x = this.x0 + ((this.x1 - this.x0) * i) / (this.N - 1);
-        const y = this.y0 + ((this.y1 - this.y0) * j) / (this.N - 1);
-        rc.set(new V3(x, y, 3), dir);
-        const hit = rc.intersectObject(mesh, false)[0];
-        this.z[j * this.N + i] = hit ? hit.point.z : 0;
-      }
-  }
   zAt(x: number, y: number) {
-    const fx = ((x - this.x0) / (this.x1 - this.x0)) * (this.N - 1);
-    const fy = ((y - this.y0) / (this.y1 - this.y0)) * (this.N - 1);
-    const i = clamp(Math.floor(fx), 0, this.N - 2), j = clamp(Math.floor(fy), 0, this.N - 2);
-    const tx = fx - i, ty = fy - j;
-    const a = this.z[j * this.N + i], b = this.z[j * this.N + i + 1];
-    const c = this.z[(j + 1) * this.N + i], d = this.z[(j + 1) * this.N + i + 1];
-    return lerp(lerp(a, b, tx), lerp(c, d, tx), ty);
+    const [W, D, p] = prof(clamp(y, -0.999, 0.999));
+    if (W < 1e-4) return 0;
+    const u = Math.min(Math.abs(x) / W, 1);
+    const v = Math.pow(Math.max(0, 1 - Math.pow(u, p)), 1 / p);
+    const dz = v / Math.max(1e-6, Math.hypot(u, v));
+    const chin = y < -0.5 ? (-0.5 - y) * 0.16 * Math.max(dz, 0) : 0;
+    return D * v + chin;
   }
   normalAt(x: number, y: number) {
     const h = 0.02;
@@ -448,7 +430,7 @@ const stubbleTexture = () =>
   canvasTex(1024, 512, (x) => {
     let s = 7;
     const r = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-    for (let i = 0; i < 38000; i++) {
+    for (let i = 0; i < 20000; i++) {
       const u = r(), v = r();
       const vv = 0.46 * v;
       const dens = clamp(1 - Math.max(0, vv - 0.18) / 0.22, 0, 1);
@@ -632,7 +614,7 @@ function Character() {
 
   const { surf, headGeo } = useMemo(() => {
     const headGeo = makeHeadGeometry();
-    return { surf: new Surface(headGeo), headGeo };
+    return { surf: new Surface(), headGeo };
   }, []);
 
   const tex = useMemo(() => {
@@ -758,16 +740,40 @@ function Character() {
   );
 }
 
+/** if the machine renders slowly, quietly drop the render resolution so everything stays smooth */
+function Governor() {
+  const st = useRef({ n: 0, sum: 0, done: false });
+  useFrame((state, dt) => {
+    const g = st.current;
+    if (g.done) return;
+    g.n++;
+    if (g.n > 20) g.sum += Math.min(dt, 0.2); // skip warm-up frames
+    if (g.n >= 80) {
+      g.done = true;
+      if (g.sum / 60 > 0.028) state.setDpr(1);
+    }
+  });
+  return null;
+}
+
 export default function PersonAvatar() {
+  // while the splash covers the page, render once (compiles shaders) instead of every frame
+  const [active, setActive] = useState(() => !!(window as unknown as { __splashDone?: boolean }).__splashDone);
+  useEffect(() => {
+    const on = () => setActive(true);
+    window.addEventListener("splash-done", on);
+    return () => window.removeEventListener("splash-done", on);
+  }, []);
   return (
     <div className="ali-3d-wrapper">
-      <Canvas camera={{ position: [0, 0.15, 6.3], fov: 31 }} dpr={[1, 2]} gl={{ antialias: true }}>
+      <Canvas frameloop={active ? "always" : "demand"} camera={{ position: [0, 0.15, 6.3], fov: 31 }} dpr={[1, 1.75]} gl={{ antialias: true, powerPreference: "high-performance" }}>
         <color attach="background" args={["#000000"]} />
         <ambientLight intensity={0.6} />
         <directionalLight position={[-2.5, 3.5, 5]} intensity={2.4} color="#fff1e4" />
         <directionalLight position={[4, 0.5, 3]} intensity={0.8} color="#ffd9c4" />
         <directionalLight position={[3.5, 2.5, -3]} intensity={1.8} color="#8fcfff" />
         <Character />
+        <Governor />
       </Canvas>
     </div>
   );

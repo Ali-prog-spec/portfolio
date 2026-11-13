@@ -765,6 +765,8 @@ export default function App() {
       {!loaded && (
         <Loader
           onDone={() => {
+            (window as unknown as { __splashDone?: boolean }).__splashDone = true;
+            window.dispatchEvent(new Event("splash-done"));
             setLoaded(true);
             build.begin();
           }}

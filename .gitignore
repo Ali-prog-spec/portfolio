@@ -1,0 +1,16 @@
+node_modules
+dist
+.env
+.env.*
+*.log
+.vercel
+
+# Assets/code that are not part of the live site (and third-party 3D assets that must not be redistributed)
+public/draco/
+public/images/
+public/models/
+public/ali_depth.png
+public/ali_normal.png
+src/components/AliCharacter3D.tsx
+src/components/Ali3DMeshAvatar.tsx
+src/components/AliTrueFace3D.tsx

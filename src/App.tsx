@@ -133,13 +133,7 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   return <span ref={ref}>0{suffix}</span>;
 }
 
-function Nav({
-  theme,
-  setTheme,
-}: {
-  theme: ThemeMode;
-  setTheme: (t: ThemeMode) => void;
-}) {
+function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -158,37 +152,6 @@ function Nav({
             Muhammad Ali<span className="dot">.</span>
           </span>
         </a>
-
-        {/* 1-Click Theme Switcher */}
-        <div className="theme-toggle-group">
-          <button
-            type="button"
-            className={`theme-chip ${theme === "gold" ? "active" : ""}`}
-            onClick={() => setTheme("gold")}
-            title="Champagne Gold Luxury Theme"
-          >
-            <span className="theme-dot gold" />
-            <span className="theme-name">Champagne</span>
-          </button>
-          <button
-            type="button"
-            className={`theme-chip ${theme === "silver" ? "active" : ""}`}
-            onClick={() => setTheme("silver")}
-            title="Titanium Monochrome Minimal Theme"
-          >
-            <span className="theme-dot silver" />
-            <span className="theme-name">Titanium</span>
-          </button>
-          <button
-            type="button"
-            className={`theme-chip ${theme === "violet" ? "active" : ""}`}
-            onClick={() => setTheme("violet")}
-            title="Royal Violet Theme"
-          >
-            <span className="theme-dot violet" />
-            <span className="theme-name">Violet</span>
-          </button>
-        </div>
 
         <nav className={`nav-menu ${open ? "open" : ""}`}>
           {NAV.map((n) => (
@@ -218,7 +181,7 @@ function Nav({
   );
 }
 
-function Hero({ theme }: { theme: ThemeMode }) {
+function Hero() {
   const root = useRef<HTMLDivElement>(null);
   const roles = [
     "Full-Stack Developer",
@@ -792,13 +755,12 @@ function Contact() {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState<ThemeMode>("gold");
   useReveal();
   const build = useLiveBuild();
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className={`portfolio-app theme-${theme}`}>
+    <div className="portfolio-app theme-gold">
       {!loaded && (
         <Loader
           onDone={() => {
@@ -809,9 +771,9 @@ export default function App() {
       )}
       <CustomCursor />
       <div className="bg-canvas" aria-hidden="true" />
-      <Nav theme={theme} setTheme={setTheme} />
+      <Nav />
       <main>
-        <Hero theme={theme} />
+        <Hero />
         <About />
         <Research />
         <Projects />

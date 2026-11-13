@@ -1983,3 +1983,15 @@ h2 {
   .lb-hud { width: min(300px, calc(100vw - 24px)); }
   .lb-marq .tg, .lb-marq .dm { font-size: 9px; }
 }
+
+/* ===== Splash greeting (beat 1) ===== */
+.ld-greet { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 16px; text-align: center; opacity: 0; pointer-events: none; will-change: opacity, transform, filter; }
+.ld-ar {
+  font-family: "Reem Kufi", "Cairo", "Segoe UI", system-ui, sans-serif; font-weight: 700; line-height: 1.7; padding: .12em .2em 0;
+  font-size: clamp(3.2rem, 13vw, 7rem);
+  background: linear-gradient(120deg, #fef08a, #f59e0b 55%, #d97706); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 26px rgba(245, 158, 11, .35));
+}
+.ld-en { font: 500 .85rem var(--font-mono, monospace); letter-spacing: .7em; padding-left: .7em; color: #cfd6e0; }
+.ld-line { display: block; width: min(240px, 52vw); height: 1px; transform: scaleX(0); background: linear-gradient(90deg, transparent, var(--accent, #f59e0b), transparent); }
+@media (max-width: 520px) { .ld-en { font-size: .72rem; letter-spacing: .55em; padding-left: .55em; } }

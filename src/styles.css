@@ -1186,10 +1186,120 @@ h2 {
 }
 
 .toolbox-card {
+  position: relative;
+  overflow: hidden;
   padding: 24px;
   border-radius: 18px;
   background: var(--bg-card);
   border: 1px solid var(--border);
+  transition: border-color 0.3s, transform 0.3s;
+}
+/* cursor spotlight */
+.toolbox-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--accent-glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toolbox-card:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-3px);
+}
+.toolbox-card:hover::before {
+  opacity: 1;
+}
+.toolbox-card > * {
+  position: relative;
+}
+/* bento: first and third cards are wider */
+@media (min-width: 900px) {
+  .toolbox-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .toolbox-card {
+    grid-column: span 2;
+  }
+  .toolbox-card.tb-0,
+  .toolbox-card.tb-3 {
+    grid-column: span 3;
+  }
+}
+.tb-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.tb-head .group-title {
+  margin: 0;
+  flex: 1;
+}
+.tb-idx {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.8;
+}
+.tb-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-accent);
+  color: var(--accent);
+}
+
+/* scrolling skill ticker */
+.skill-marquee {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 28px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.skill-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  animation: skill-scroll 60s linear infinite;
+}
+.skill-track.rev {
+  animation-direction: reverse;
+  animation-duration: 75s;
+}
+.skill-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text);
+}
+.skill-tick i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+@keyframes skill-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-track {
+    animation: none;
+  }
 }
 
 .group-title {
@@ -1226,6 +1336,18 @@ h2 {
   border-color: var(--border-accent);
   background: rgba(255, 255, 255, 0.08);
   color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--accent-glow);
+}
+.skill-dot {
+  animation: skill-pulse 2.6s ease-in-out infinite;
+  animation-delay: inherit;
+}
+@keyframes skill-pulse {
+  50% {
+    box-shadow: 0 0 8px var(--accent);
+    transform: scale(1.5);
+  }
 }
 
 .skill-dot {
@@ -2084,6 +2206,138 @@ h2 {
   transform-style: preserve-3d;
 }
 
+/* =========================================================================
+   INTERACTIVE 3D FACE & MOVEABLE EYE TRACKING STAGE
+   ========================================================================= */
+.interactive-character-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+  pointer-events: auto;
+  cursor: grab;
+  z-index: 2;
+}
+
+.interactive-character-stage:active {
+  cursor: grabbing;
+}
+
+.character-portrait-box {
+  position: relative;
+  height: 94%;
+  max-width: 90%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.character-main-img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 35px rgba(245, 158, 11, 0.12));
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Eye Apertures matching the exact eye sockets on the face */
+.eye-aperture {
+  position: absolute;
+  width: 7.2%;
+  height: 5.2%;
+  border-radius: 50% 50% 46% 46% / 55% 55% 45% 45%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.eye-aperture.eye-left {
+  left: 36.4%;
+  top: 36.4%;
+  transform: rotate(-3deg);
+}
+
+.eye-aperture.eye-right {
+  left: 56.9%;
+  top: 35.5%;
+  transform: rotate(3deg);
+}
+
+/* Eyeball container shifting with mouse gaze */
+.eye-eyeball {
+  position: absolute;
+  inset: -25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  transition: transform 0.04s linear;
+}
+
+.eye-iris {
+  position: relative;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, #4a2716 0%, #2b140a 65%, #140803 100%);
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.85), 0 0 4px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-pupil {
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: #080504;
+}
+
+.eye-glint {
+  position: absolute;
+  top: 18%;
+  right: 20%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 3px #ffffff;
+}
+
+/* Natural Eyelid Blinking */
+.eye-lid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: #c38a64;
+  border-bottom: 1.5px solid #7c442e;
+  transform: translateY(-100%);
+  transition: transform 0.08s ease-in;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.eye-lid.blink-close {
+  transform: translateY(0%);
+  transition: transform 0.05s ease-out;
+}
+
+.character-lighting-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 8px;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.1) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%);
+}
+
 .pixar-character-img {
   max-height: 94%;
   max-width: 90%;
@@ -2162,15 +2416,59 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
-  background: rgba(14, 16, 22, 0.85);
+  background: rgba(14, 16, 22, 0.88);
   border: 1px solid var(--border);
   font-family: var(--font-mono);
   font-size: 0.66rem;
   color: var(--text-muted);
   backdrop-filter: blur(10px);
   z-index: 15;
+}
+
+.true-3d-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.true-3d-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+  cursor: grab;
+}
+
+.true-3d-canvas-container canvas:active {
+  cursor: grabbing;
+}
+
+.true-3d-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.true-3d-toggle:hover {
+  color: var(--accent);
+}
+
+.true-3d-hint {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  border-left: 1px solid var(--border);
+  padding-left: 8px;
+  margin-left: 4px;
 }
 
 .hero-model-switch {

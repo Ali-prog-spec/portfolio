@@ -619,13 +619,43 @@ function Toolbox() {
         <h2>Languages, Frameworks &amp; Deep Systems</h2>
       </div>
 
+      <div className="skill-marquee" aria-hidden="true">
+        {[0, 1].map((row) => {
+          const all = skills.flatMap((g) => g.items);
+          const list = row ? [...all].reverse() : all;
+          return (
+            <div key={row} className={`skill-track ${row ? "rev" : ""}`}>
+              {[...list, ...list].map((s, i) => (
+                <span key={i} className="skill-tick">
+                  <i />
+                  {s}
+                </span>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
       <div className="toolbox-grid">
-        {skills.map((group) => (
-          <div key={group.group} className="toolbox-card" data-reveal>
-            <h4 className="group-title">{group.group}</h4>
+        {skills.map((group, gi) => (
+          <div
+            key={group.group}
+            className={`toolbox-card tb-${gi}`}
+            data-reveal
+            onPointerMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+              e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+            }}
+          >
+            <div className="tb-head">
+              <span className="tb-idx">{String(gi + 1).padStart(2, "0")}</span>
+              <h4 className="group-title">{group.group}</h4>
+              <span className="tb-count">{group.items.length}</span>
+            </div>
             <div className="skills-pill-grid">
-              {group.items.map((item) => (
-                <div key={item} className="skill-chip">
+              {group.items.map((item, ii) => (
+                <div key={item} className="skill-chip" style={{ animationDelay: `${ii * 0.35}s` }}>
                   <span className="skill-dot" />
                   <span className="skill-name">{item}</span>
                 </div>

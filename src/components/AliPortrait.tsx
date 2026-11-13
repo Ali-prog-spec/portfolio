@@ -59,9 +59,9 @@ export default function AliPortrait() {
     const drawMouth = () => {
       ctx.drawImage(img, MX0, MY0, MX1 - MX0, MY1 - MY0, MX0, MY0, MX1 - MX0, MY1 - MY0);
       for (let x = MX0; x < MX1; x++) {
-        const te = ease((x - MX0) / 34) * ease((MX1 - x) / 34);
+        const te = Math.min(1, 1.8 * ease((x - MX0) / 34) * ease((MX1 - x) / 34));
         if (te < 0.003) continue;
-        const u = interp(UP, x + 0.5), l = interp(LO, x + 0.5);
+        const u = interp(UP, x + 0.5) - 3.5, l = interp(LO, x + 0.5) + 4.5; // skip the lip creases and teeth
         const q = Math.min(1, Math.pow((x - 452) / 92, 2));
         const yc = YC + 3.5 * q; // corners sit a touch lower: a calm, straight mouth
         const a1 = u + (yc - u) * te, a2 = l + (yc - l) * te;
@@ -71,6 +71,10 @@ export default function AliPortrait() {
           const sh = s1 - s0, dh = d1 - d0;
           if (dh < 0.4 || sh < 0.4) continue;
           ctx.drawImage(img, x, s0, 1, sh, x, d0, 1, dh);
+        }
+        if (te > 0.97 && x > 356 && x < 552) {
+          ctx.fillStyle = "rgba(86,40,32,0.5)"; // the seam where the lips meet
+          ctx.fillRect(x, yc - 0.6, 1, 1.3);
         }
       }
     };

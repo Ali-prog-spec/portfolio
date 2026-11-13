@@ -224,11 +224,6 @@ function Hero() {
   return (
     <section id="top" className="hero" ref={root}>
       <div className="hero-copy">
-        <div className="hero-badge hero-fade">
-          <span className="badge-pulse" />
-          <span>Full-Stack Engineer at K2 Studio · FAST-NUCES Islamabad</span>
-        </div>
-
         <h1 className="hero-title">
           <span className="mask">
             <span className="hero-line">Hi, I'm</span>
